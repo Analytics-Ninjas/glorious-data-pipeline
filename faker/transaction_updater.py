@@ -1,39 +1,20 @@
-import pandas as pd
-import numpy as np
 from sqlalchemy import create_engine, text
-from sshtunnel import SSHTunnelForwarder
-from faker import Faker
 import random
 import datetime
 
-ssh_host = '43.207.203.155'
-ssh_port = 22
-ssh_user = 'ubuntu'
-ssh_pkey = '/Users/mac/Desktop/AnalyticsNinja/aws-terraform-resources-startups/my_key_pair.pem'
-db_user = 'admin'
-db_password = 'password'
-db_host = 'my-db-instance.cxjkxlbvg4uh.ap-northeast-1.rds.amazonaws.com'
-db_name = 'stock_db'
 
-bastion_server = SSHTunnelForwarder(
-    (ssh_host, ssh_port),
-    ssh_username=ssh_user,
-    ssh_pkey=ssh_pkey,
-    remote_bind_address=(db_host, 3306),
-)
-
-bastion_server.start()
-local_db_port = bastion_server.local_bind_port
-
-db_url = f'mysql+pymysql://{db_user}:{db_password}@127.0.0.1:{local_db_port}/{db_name}'
+db_user = "admin"
+db_password = "password"
+db_host = "my-db-instance.cxjkxlbvg4uh.ap-northeast-1.rds.amazonaws.com"
+db_name = "stock_db"
+db_url = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{db_name}"
 
 engine = create_engine(db_url)
-
 conn = engine.connect()
 
 # Randomize transaction count ratio to total users
 transaction_rate = random.uniform(0.5, 4)
-result_user = conn.execute(text(f'SELECT * FROM stock_db.User')).fetchall()
+result_user = conn.execute(text(f"SELECT * FROM stock_db.User")).fetchall()
 transaction_count = round(len(result_user) * transaction_rate)
 
 stock_info = conn.execute(text(f"SELECT * FROM stock_db.Stock")).fetchall()
@@ -45,15 +26,17 @@ for i in range(transaction_count):
     random_user = result_user[random_user_loc][0]
     random_stock = stock_info[random_stock_loc][0]
     random_quantity = random.randint(100, 1000000)
-    random_transaction_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    transaction_list.append(str((random_user, random_stock, random_quantity, random_transaction_date)))
+    random_transaction_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    transaction_list.append(
+        str((random_user, random_stock, random_quantity, random_transaction_date))
+    )
 
-transaction_query = ','.join(transaction_list)
-insert_query = f'''
+transaction_query = ",".join(transaction_list)
+insert_query = f"""
 INSERT INTO stock_db.Transaction (user_id, stock_id, quantity, transaction_date)
 VALUES {transaction_query}
-'''
+"""
+
 conn.execute(text(insert_query))
 conn.commit()
 conn.close()
-bastion_server.stop()
