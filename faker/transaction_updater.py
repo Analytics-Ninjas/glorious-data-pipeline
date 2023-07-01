@@ -3,6 +3,7 @@ import random
 import datetime
 import os
 
+
 db_url = os.environ['DB_URL']
 
 
