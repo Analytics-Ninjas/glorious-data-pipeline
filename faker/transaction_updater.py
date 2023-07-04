@@ -6,7 +6,6 @@ import os
 db_url = os.environ["DB_URL"]
 
 
-
 def updater(event, context):
     engine = create_engine(db_url)
     with engine.connect() as conn:
@@ -15,7 +14,7 @@ def updater(event, context):
 
 # Randomize transaction count ratio to total users
 def get_info(conn, transaction_count):
-    result_user = conn.execute(text(f'SELECT * FROM stock_db.User')).fetchall()
+    result_user = conn.execute(text(f"SELECT * FROM stock_db.User")).fetchall()
     stock_info = conn.execute(text(f"SELECT * FROM stock_db.Stock")).fetchall()
     return result_user, stock_info, transaction_count
 
