@@ -30,7 +30,7 @@ def update_current_user(conn):
         updated_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         update_query = f"""
         UPDATE stock_db.User 
-        SET email = '{new_email}', updated_at = {updated_at}, status = 'U' 
+        SET email = '{new_email}', updated_at = '{updated_at}', status = 'U' 
         WHERE user_id = {user_id}
         """
         conn.execute(text(update_query))
