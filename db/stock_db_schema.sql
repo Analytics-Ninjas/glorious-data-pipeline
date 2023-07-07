@@ -24,7 +24,7 @@ CREATE TABLE transaction
      user_id          INT NULL,
      stock_id         VARCHAR(5) NOT NULL,
      quantity         INT NOT NULL,
-     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL
+     transaction_date TIMESTAMP,
      CONSTRAINT transaction_stock_stock_id_fk FOREIGN KEY (stock_id) REFERENCES
      stock (stock_id),
      CONSTRAINT transaction_user_user_id_fk FOREIGN KEY (user_id) REFERENCES

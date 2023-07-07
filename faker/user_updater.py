@@ -27,7 +27,9 @@ def update_current_user(conn):
     for usr in update_user:
         user_id = usr[0]
         new_email = fake.email()
-        updated_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        updated_at = (datetime.datetime.now() + datetime.timedelta(hours=7)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         update_query = f"""
         UPDATE stock_db.User 
         SET email = '{new_email}', updated_at = '{updated_at}', status = 'U' 
@@ -44,7 +46,7 @@ def create_new_user(new_user_count, conn):
         user_name = fake.name()
         user_email = fake.email()
         updated_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        status = 'I'
+        status = "I"
         new_user_list.append(str((user_name, user_email, updated_at, status)))
     # Create query string to insert new users
     insert_val = ",".join(new_user_list)
