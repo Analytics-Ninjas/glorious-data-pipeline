@@ -1,10 +1,10 @@
 CREATE TABLE stock_dim
 (
-     SK_stock_id SERIAL PRIMARY KEY NOT NULL,
-	 stock_id    VARCHAR(5) NOT NULL,
-     company     VARCHAR(100) NOT NULL,
-     category    VARCHAR(100) NOT NULL,
-     price       DECIMAL(10, 2) NOT NULL
+	SK_stock_id SERIAL PRIMARY KEY NOT NULL,
+	stock_id    VARCHAR(5) NOT NULL,
+	company     VARCHAR(100) NOT NULL,
+	category    VARCHAR(100) NOT NULL,
+	price       DECIMAL(10, 2) NOT NULL
 );
 
 CREATE TABLE user_dim
@@ -13,8 +13,6 @@ CREATE TABLE user_dim
     user_id    INT NOT NULL,
     name       VARCHAR(100) NOT NULL,
     email      VARCHAR(100) NOT NULL,
-    updated_at TIMESTAMP,
-    status     VARCHAR(1) DEFAULT NULL,
     start_date TIMESTAMP NOT NULL,
     end_date   TIMESTAMP NOT NULL,
     is_current CHAR(1) NOT NULL
