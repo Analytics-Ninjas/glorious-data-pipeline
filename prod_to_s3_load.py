@@ -9,30 +9,18 @@ db_url = os.environ["DB_URL"]
 engine = create_engine(db_url)
 
 
-def get_latest_update_prod(conn):
+def get_latest_records(conn):
     query = """
     SELECT *
     FROM User
     WHERE DATE(updated_at) = CURRENT_DATE() - 1
-    AND status = 'U'
-    """
-    result = conn.execute(text(query)).fetchall()
-    return result
-
-
-def get_latest_insert_prod(conn):
-    query = """
-    SELECT *
-    FROM User
-    WHERE DATE(updated_at) = CURRENT_DATE() - 1
-    AND status = 'I'
     """
     result = conn.execute(text(query)).fetchall()
     return result
 
 
 def get_latest_snapshot_datalake():
-    snap_dir = get_path_snapshot(1)
+    snap_dir = get_path_snapshot()
     s3_client = boto3.client("s3")
     s3_bucket = "analytics-ninjas-85ncy6"
     s3_object_key = snap_dir.lstrip("/")
@@ -48,28 +36,26 @@ def get_path_snapshot(days=2):
     return f"/ETL/stock_db/user/partition={today}/user.csv"
 
 
-def update_snapshot(conn):
-    updated_users = get_latest_update_prod(conn)
-    updated_users = pd.DataFrame(updated_users)
-    updated_users_id = updated_users["user_id"].values
-    current_users = get_latest_snapshot_datalake()
-    current_users = current_users.loc[~current_users["user_id"].isin(updated_users_id)]
-    return pd.concat([current_users, updated_users]).sort_values(by="user_id")
+def update_snapshot(latest_records, latest_snapshot):
+    update_records = latest_records.loc[latest_records["status"] == "U"]
+    update_records_id = update_records["user_id"].values
+    latest_snapshot = latest_snapshot.loc[
+        ~latest_snapshot["user_id"].isin(update_records_id)
+    ]
+    return pd.concat([latest_snapshot, update_records]).sort_values(by="user_id")
 
 
-def insert_snapshot(conn):
-    inserted_users = get_latest_insert_prod(conn)
-    inserted_users = pd.DataFrame(inserted_users)
-    current_users = update_snapshot(conn)
-    return pd.concat([current_users, inserted_users]).sort_values(by="user_id")
+def insert_snapshot(latest_records, latest_snapshot):
+    insert_records = latest_records.loc[latest_records["status"] == "I"]
+    return pd.concat([latest_snapshot, insert_records]).sort_values(by="user_id")
 
 
-def get_full_prod_data(conn):
+def get_full_records(conn):
     query = """
     SELECT *
     FROM User
     """
-    result = conn.execute(query).fetchall()
+    result = conn.execute(text(query)).fetchall()
     return pd.DataFrame(result)
 
 
@@ -87,9 +73,15 @@ def upload_to_datalake(df):
 
 def incremental_load():
     with engine.connect() as conn:
-        upload_to_datalake(insert_snapshot(conn))
+        latest_records = get_latest_records(conn)
+        latest_snapshot = get_latest_snapshot_datalake()
+        upload_to_datalake(
+            insert_snapshot(
+                latest_records, update_snapshot(latest_records, latest_snapshot)
+            )
+        )
 
 
 def full_load():
     with engine.connect() as conn:
-        upload_to_datalake(get_full_prod_data(conn))
+        upload_to_datalake(get_full_records(conn))
