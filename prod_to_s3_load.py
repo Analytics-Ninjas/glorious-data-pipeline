@@ -22,18 +22,19 @@ def get_latest_records(conn):
 def get_latest_snapshot_datalake():
     snap_dir = get_path_snapshot()
     s3_client = boto3.client("s3")
-    s3_bucket = "analytics-ninjas-85ncy6"
+    s3_bucket = "analytics-ninjas"
     s3_object_key = snap_dir.lstrip("/")
     s3_response = s3_client.get_object(Bucket=s3_bucket, Key=s3_object_key)
     df = pd.read_csv(s3_response["Body"])
     return df
 
 
-def get_path_snapshot(days=2):
+def get_path_snapshot(days=2, append_file=True):
     today = str(datetime.datetime.now() - datetime.timedelta(days=days))[0:10].replace(
         "-", ""
     )
-    return f"/ETL/stock_db/user/partition={today}/user.csv"
+    bucket_path = f"/stock_db/user/partition={today}/user.csv"
+    return bucket_path if append_file else bucket_path.rstrip('/user.csv')
 
 
 def update_snapshot(latest_records, latest_snapshot):
@@ -62,9 +63,9 @@ def get_full_records(conn):
 def upload_to_datalake(df):
     csv_buffer = StringIO()
     df.to_csv(csv_buffer, index=False)
-    file_dir = get_path_snapshot()
+    file_dir = get_path_snapshot(1)
     s3 = boto3.client("s3")
-    s3_bucket = "analytics-ninjas-85ncy6"
+    s3_bucket = "analytics-ninjas"
     s3.put_object(
         Body=csv_buffer.getvalue(), Bucket=s3_bucket, Key=file_dir.lstrip("/")
     )
@@ -82,6 +83,22 @@ def incremental_load():
         )
 
 
+def list_s3_files(bucket_name, prefix=''):
+    s3 = boto3.client('s3')
+    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    files = []
+    for obj in response.get('Contents', []):
+        files.append(obj['Key'])
+    return files
+
+
 def full_load():
     with engine.connect() as conn:
         upload_to_datalake(get_full_records(conn))
+
+
+if __name__ == "__main__":
+    if list_s3_files('analytics-ninjas', get_path_snapshot(append_file=False)):
+        incremental_load()
+    else:
+        full_load()
