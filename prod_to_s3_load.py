@@ -34,7 +34,7 @@ def get_path_snapshot(days=2, append_file=True):
         "-", ""
     )
     bucket_path = f"/stock_db/user/partition={today}/user.csv"
-    return bucket_path if append_file else bucket_path.rstrip('/user.csv')
+    return bucket_path if append_file else bucket_path.rstrip("/user.csv")
 
 
 def update_snapshot(latest_records, latest_snapshot):
@@ -83,12 +83,12 @@ def incremental_load():
         )
 
 
-def list_s3_files(bucket_name, prefix=''):
-    s3 = boto3.client('s3')
+def list_s3_files(bucket_name, prefix=""):
+    s3 = boto3.client("s3")
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     files = []
-    for obj in response.get('Contents', []):
-        files.append(obj['Key'])
+    for obj in response.get("Contents", []):
+        files.append(obj["Key"])
     return files
 
 
@@ -98,7 +98,7 @@ def full_load():
 
 
 if __name__ == "__main__":
-    if list_s3_files('analytics-ninjas', get_path_snapshot(append_file=False)):
+    if list_s3_files("analytics-ninjas", get_path_snapshot(append_file=False)):
         incremental_load()
     else:
         full_load()
