@@ -37,18 +37,14 @@ def get_path_snapshot(days):
     return f"/stock_db/user/partition={today}/user.csv"
 
 
-def element_to_string(element):
-    return f"{element}"
-
-
 def get_records(df, records_type):
     if records_type != "All":
         df = df.loc[df["status"] == records_type]
-    df.rename(columns={"udated_at": "start_date"})
+    df.rename(columns={"updated_at": "start_date"})
     df = df.drop(columns=["status"])
-    df["end_date"] = "9999-01-01 00:00:00"
+    df["end_date"] = "9999-12-31 23:59:59"
     df["is_current"] = True
-    vectorized_element_to_string = np.vectorize(element_to_string)
+    vectorized_element_to_string = np.vectorize(str)
     records = ",".join(
         vectorized_element_to_string(pd.Series(df.to_records(index=False).tolist()))
     )
