@@ -4,16 +4,25 @@ from sqlalchemy import create_engine, text
 import datetime
 from io import StringIO
 import os
+import sys
 
 db_url = os.environ["DB_URL"]
 engine = create_engine(db_url)
 
 
+def check_command_line_argv(default_value=0):
+    arg_value = default_value
+    if len(sys.argv) > 1:
+        arg_value = sys.argv[1]
+    return int(arg_value)
+
+
 def get_latest_records(conn):
-    query = """
+    updated_at = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())).strftime('%Y-%m-%d')
+    query = f"""
     SELECT *
     FROM User
-    WHERE DATE(updated_at) = CURRENT_DATE() - 1
+    WHERE DATE(updated_at) = DATE '{updated_at}' - 1
     """
     result = conn.execute(text(query)).fetchall()
     return result
@@ -30,7 +39,7 @@ def get_latest_snapshot_datalake():
 
 
 def get_path_snapshot(days=2, append_file=True):
-    today = str(datetime.datetime.now() - datetime.timedelta(days=days))[0:10].replace(
+    today = str(datetime.datetime.now() - datetime.timedelta(days=days) + datetime.timedelta(hours=7))[0:10].replace(
         "-", ""
     )
     bucket_path = f"/stock_db/user/partition={today}/user.csv"
@@ -52,9 +61,11 @@ def insert_snapshot(latest_records, latest_snapshot):
 
 
 def get_full_records(conn):
-    query = """
+    current_date = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) + datetime.timedelta(hours=7)).strftime('%Y-%m-%d')
+    query = f"""
     SELECT *
     FROM User
+    WHERE DATE(updated_at) < '{current_date}'
     """
     result = conn.execute(text(query)).fetchall()
     return pd.DataFrame(result)
