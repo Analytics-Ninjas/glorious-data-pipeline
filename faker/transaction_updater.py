@@ -36,7 +36,9 @@ def user_stock_matching(result_user, stock_info, transaction_count):
         random_stock = stock_info[random_stock_loc][0]
         random_quantity = random.randint(1, 10)
         random_transaction_date = (
-            datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) + datetime.timedelta(hours=7)
+            datetime.datetime.now()
+            - datetime.timedelta(days=check_command_line_argv())
+            + datetime.timedelta(hours=7)
         ).strftime("%Y-%m-%d %H:%M:%S")
         transaction_list.append(
             str((random_user, random_stock, random_quantity, random_transaction_date))
