@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, text
 import random
 import datetime
 import os
+import sys
 
 db_url = os.environ["DB_URL"]
 
@@ -19,6 +20,13 @@ def get_info(conn, transaction_count):
     return result_user, stock_info, transaction_count
 
 
+def check_command_line_argv(default_value=1):
+    arg_value = default_value
+    if len(sys.argv) > 1:
+        arg_value = sys.argv[1]
+    return arg_value
+
+
 def user_stock_matching(result_user, stock_info, transaction_count):
     transaction_list = []
     for i in range(transaction_count):
@@ -28,7 +36,7 @@ def user_stock_matching(result_user, stock_info, transaction_count):
         random_stock = stock_info[random_stock_loc][0]
         random_quantity = random.randint(1, 10)
         random_transaction_date = (
-            datetime.datetime.now() + datetime.timedelta(hours=7)
+            datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) + datetime.timedelta(hours=7)
         ).strftime("%Y-%m-%d %H:%M:%S")
         transaction_list.append(
             str((random_user, random_stock, random_quantity, random_transaction_date))

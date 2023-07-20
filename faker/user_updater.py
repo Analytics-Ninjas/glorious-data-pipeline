@@ -3,6 +3,7 @@ from faker import Faker
 import random
 import os
 import datetime
+import sys
 
 
 db_url = os.environ["DB_URL"]
@@ -21,13 +22,20 @@ def update_rate(conn):
     return update_user
 
 
+def check_command_line_argv(default_value=1):
+    arg_value = default_value
+    if len(sys.argv) > 1:
+        arg_value = sys.argv[1]
+    return arg_value
+
+
 def update_current_user(conn):
     fake = Faker()
     update_user = update_rate(conn)
     for usr in update_user:
         user_id = usr[0]
         new_email = fake.email()
-        updated_at = (datetime.datetime.now() + datetime.timedelta(hours=7)).strftime(
+        updated_at = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) + datetime.timedelta(hours=7)).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
         update_query = f"""
@@ -45,7 +53,7 @@ def create_new_user(new_user_count, conn):
     for new_usr in range(new_user_count):
         user_name = fake.name()
         user_email = fake.email()
-        updated_at = (datetime.datetime.now() + datetime.timedelta(hours=7)).strftime(
+        updated_at = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) + datetime.timedelta(hours=7)).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
         status = "I"
