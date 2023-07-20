@@ -61,9 +61,11 @@ def insert_snapshot(latest_records, latest_snapshot):
 
 
 def get_full_records(conn):
-    query = """
+    current_date = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())).strftime('%Y-%m-%d')
+    query = f"""
     SELECT *
     FROM User
+    WHERE updated_at <= {current_date}
     """
     result = conn.execute(text(query)).fetchall()
     return pd.DataFrame(result)
