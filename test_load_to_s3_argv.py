@@ -22,7 +22,7 @@ def get_latest_records(conn):
     query = f"""
     SELECT *
     FROM User
-    WHERE DATE(updated_at) = {updated_at} - 1
+    WHERE DATE(updated_at) = DATE '{updated_at}' - 1
     """
     result = conn.execute(text(query)).fetchall()
     return result
@@ -65,7 +65,7 @@ def get_full_records(conn):
     query = f"""
     SELECT *
     FROM User
-    WHERE DATE(updated_at) <= {current_date}
+    WHERE DATE(updated_at) < '{current_date}'
     """
     result = conn.execute(text(query)).fetchall()
     return pd.DataFrame(result)
