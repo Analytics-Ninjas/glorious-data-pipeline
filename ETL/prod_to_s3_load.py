@@ -19,7 +19,10 @@ def check_command_line_argv(default_value=0):
 
 def get_latest_records(conn):
     updated_at = (
-        datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())
+        datetime.datetime.now()
+        - datetime.timedelta(
+            days=check_command_line_argv() + datetime.timedelta(hours=7)
+        )
     ).strftime("%Y-%m-%d")
     query = f"""
     SELECT *
