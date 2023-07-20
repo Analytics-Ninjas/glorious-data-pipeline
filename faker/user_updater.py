@@ -22,7 +22,7 @@ def update_rate(conn):
     return update_user
 
 
-def check_command_line_argv(default_value=1):
+def check_command_line_argv(default_value=0):
     arg_value = default_value
     if len(sys.argv) > 1:
         arg_value = sys.argv[1]

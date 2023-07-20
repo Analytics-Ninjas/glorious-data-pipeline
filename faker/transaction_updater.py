@@ -20,7 +20,7 @@ def get_info(conn, transaction_count):
     return result_user, stock_info, transaction_count
 
 
-def check_command_line_argv(default_value=1):
+def check_command_line_argv(default_value=0):
     arg_value = default_value
     if len(sys.argv) > 1:
         arg_value = sys.argv[1]
