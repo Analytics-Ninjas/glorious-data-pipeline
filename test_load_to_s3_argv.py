@@ -65,7 +65,7 @@ def get_full_records(conn):
     query = f"""
     SELECT *
     FROM User
-    WHERE updated_at <= {current_date}
+    WHERE DATE(updated_at) <= {current_date}
     """
     result = conn.execute(text(query)).fetchall()
     return pd.DataFrame(result)
