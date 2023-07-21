@@ -50,41 +50,46 @@ def get_path_snapshot(days):
 def get_records(df, records_type):
     if records_type != "All":
         df = df.loc[df["status"] == records_type]
-    df.rename(columns={"updated_at": "start_date"})
-    df = df.drop(columns=["status"])
-    df["end_date"] = "9999-12-31 23:59:59"
-    df["is_current"] = True
-    vectorized_element_to_string = np.vectorize(str)
-    records = ",".join(
-        vectorized_element_to_string(pd.Series(df.to_records(index=False).tolist()))
-    )
+    records = ''
+    if df.shape[0]:
+        df.rename(columns={"updated_at": "start_date"})
+        df = df.drop(columns=["status"])
+        df["end_date"] = "9999-12-31 23:59:59"
+        df["is_current"] = True
+        vectorized_element_to_string = np.vectorize(str)
+        records = ",".join(
+            vectorized_element_to_string(pd.Series(df.to_records(index=False).tolist()))
+        )
     return df, records
 
 
 def update_end_date_outdated_records(conn, df):
     update_values = get_records(df, "U")[1]
-    query = f"""
-    INSERT INTO user_dim (
-        user_id, name, email, start_date, end_date, is_current
-    ) 
-    VALUES {update_values}
-    ON CONFLICT (user_id, end_date) DO 
-    UPDATE 
-    SET 
-        end_date = EXCLUDED.start_date - interval '1 second',
-        is_current = false 
-    WHERE 
-        user_dim.sk_user_id = (
-            SELECT 
-                MAX(sk_user_id) 
-            FROM 
-                user_dim 
-            WHERE 
-                user_id = EXCLUDED.user_id
-    );
-    """
-    conn.execute(text(query))
-    conn.commit()
+    if update_values:
+        query = f"""
+        INSERT INTO user_dim (
+            user_id, name, email, start_date, end_date, is_current
+        ) 
+        VALUES {update_values}
+        ON CONFLICT (user_id, end_date) DO 
+        UPDATE 
+        SET 
+            end_date = EXCLUDED.start_date - interval '1 second',
+            is_current = false 
+        WHERE 
+            user_dim.sk_user_id = (
+                SELECT 
+                    MAX(sk_user_id) 
+                FROM 
+                    user_dim 
+                WHERE 
+                    user_id = EXCLUDED.user_id
+        );
+        """
+        conn.execute(text(query))
+        conn.commit()
+    else:
+        pass
 
 
 def insert_new_records(conn, df):
