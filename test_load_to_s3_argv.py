@@ -18,7 +18,9 @@ def check_command_line_argv(default_value=0):
 
 
 def get_latest_records(conn):
-    updated_at = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())).strftime('%Y-%m-%d')
+    updated_at = (
+        datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())
+    ).strftime("%Y-%m-%d")
     query = f"""
     SELECT *
     FROM User
@@ -39,9 +41,11 @@ def get_latest_snapshot_datalake():
 
 
 def get_path_snapshot(days=2, append_file=True):
-    today = str(datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv()) - datetime.timedelta(days=days))[0:10].replace(
-        "-", ""
-    )
+    today = str(
+        datetime.datetime.now()
+        - datetime.timedelta(days=check_command_line_argv())
+        - datetime.timedelta(days=days)
+    )[0:10].replace("-", "")
     bucket_path = f"/stock_db/user/partition={today}/user.csv"
     return bucket_path if append_file else bucket_path.rstrip("/user.csv")
 
@@ -61,7 +65,9 @@ def insert_snapshot(latest_records, latest_snapshot):
 
 
 def get_full_records(conn):
-    current_date = (datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())).strftime('%Y-%m-%d')
+    current_date = (
+        datetime.datetime.now() - datetime.timedelta(days=check_command_line_argv())
+    ).strftime("%Y-%m-%d")
     query = f"""
     SELECT *
     FROM User
