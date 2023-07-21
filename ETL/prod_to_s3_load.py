@@ -45,6 +45,7 @@ def get_latest_snapshot_datalake():
 def get_path_snapshot(days=2, append_file=True):
     today = str(
         datetime.datetime.now()
+        - datetime.timedelta(days=check_command_line_argv())
         - datetime.timedelta(days=days)
         + datetime.timedelta(hours=7)
     )[0:10].replace("-", "")
