@@ -31,9 +31,11 @@ def get_latest_snapshot_datalake(days=1):
 
 
 def get_path_snapshot(days):
-    today = str(datetime.datetime.now() - datetime.timedelta(days=days))[0:10].replace(
-        "-", ""
-    )
+    today = str(
+        datetime.datetime.now()
+        + datetime.timedelta(hours=7)
+        - datetime.timedelta(days=days)
+    )[0:10].replace("-", "")
     return f"/stock_db/user/partition={today}/user.csv"
 
 
