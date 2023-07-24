@@ -74,4 +74,3 @@ def upload_to_datalake(df):
 def full_load():
     with engine.connect() as conn:
         upload_to_datalake(get_full_records(conn))
-        
