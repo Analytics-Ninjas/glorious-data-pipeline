@@ -72,7 +72,7 @@ def records_to_tuple(df):
 
 def update_end_date_outdated_records(conn, update_values):
     query = f'''
-    INSERT INTO user_dim_test (
+    INSERT INTO user_dim (
         user_id, name, email, start_date, end_date, is_current
     ) 
     VALUES {update_values}
@@ -82,11 +82,11 @@ def update_end_date_outdated_records(conn, update_values):
         end_date = EXCLUDED.start_date - interval '1 second',
         is_current = false 
     WHERE 
-        user_dim_test.sk_user_id = (
+        user_dim.sk_user_id = (
             SELECT 
                 MAX(sk_user_id) 
             FROM 
-                user_dim_test
+                user_dim
             WHERE 
                 user_id = EXCLUDED.user_id
     );
@@ -97,7 +97,7 @@ def update_end_date_outdated_records(conn, update_values):
 
 def insert_new_records(conn, insert_values):
     query = f'''
-    INSERT INTO user_dim_test (
+    INSERT INTO user_dim (
         user_id, name, email, start_date, end_date, is_current
     ) 
     VALUES {insert_values}
