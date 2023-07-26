@@ -115,7 +115,7 @@ def full_load(conn):
 if __name__ == "__main__":
     with engine.connect() as conn:
         if check_no_rows_dw(conn):
-            incremental_load()
+            incremental_load(conn)
         else:
             full_load(conn)
         conn.commit()
