@@ -59,19 +59,21 @@ def get_records_full_load(df):
 
 def records_to_tuple(df):
     if df.shape[0] != 0:
-        df.rename(columns = {'udated_at':'start_date'})
-        df = df.drop(columns=['status'])
-        df['end_date'] = '9999-12-31 23:59:59'
-        df['is_current'] = True
+        df.rename(columns={"udated_at": "start_date"})
+        df = df.drop(columns=["status"])
+        df["end_date"] = "9999-12-31 23:59:59"
+        df["is_current"] = True
         vectorized_element_to_string = np.vectorize(str)
-        records = ','.join(vectorized_element_to_string(pd.Series(df.to_records(index = False).tolist())))
+        records = ",".join(
+            vectorized_element_to_string(pd.Series(df.to_records(index=False).tolist()))
+        )
         return df, records
     else:
-        return df, ''
+        return df, ""
 
 
 def update_end_date_outdated_records(conn, update_values):
-    query = f'''
+    query = f"""
     INSERT INTO user_dim (
         user_id, name, email, start_date, end_date, is_current
     ) 
@@ -90,24 +92,24 @@ def update_end_date_outdated_records(conn, update_values):
             WHERE 
                 user_id = EXCLUDED.user_id
     );
-    '''
+    """
     conn.execute(text(query))
     conn.commit()
 
 
 def insert_new_records(conn, insert_values):
-    query = f'''
+    query = f"""
     INSERT INTO user_dim (
         user_id, name, email, start_date, end_date, is_current
     ) 
     VALUES {insert_values}
-    '''
+    """
     conn.execute(text(query))
 
 
 def incremental_load(conn, df):
-    update_end_date_outdated_records(conn, get_records_incremental_load(df, 'U')[1])
-    insert_new_records(conn, get_records_incremental_load(df, 'All')[1])
+    update_end_date_outdated_records(conn, get_records_incremental_load(df, "U")[1])
+    insert_new_records(conn, get_records_incremental_load(df, "All")[1])
 
 
 def full_load(conn, df):
