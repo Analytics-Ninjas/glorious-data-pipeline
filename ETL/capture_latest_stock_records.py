@@ -65,7 +65,7 @@ def find_updated_records(df1, df2):
         updated_record
     else:
         updated_record["start_date"] = (
-            str((datetime.now() + timedelta(hours=7)).date()) + " 08:00:00"
+            str(datetime.now() + timedelta(hours=7))
         )
         updated_record["end_date"] = "9999-12-31 23:59:59"
         updated_record["is_current"] = True
