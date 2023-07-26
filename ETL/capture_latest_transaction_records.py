@@ -96,7 +96,7 @@ def get_user_sk(conn, load_type, df=get_latest_snapshot_datalake()):
 def insert_records(conn, fact_df):
     insert_values = records_to_tuple(fact_df)[1]
     query = f"""
-    INSERT INTO transaction_source (FK_user_id, stock_id, quantity, transaction_date)
+    INSERT INTO transaction_fact (FK_user_id, FK_stock_id, quantity, transaction_date)
     VALUES {insert_values}
     """
     conn.execute(text(query))
