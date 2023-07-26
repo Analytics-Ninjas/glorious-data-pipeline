@@ -117,5 +117,5 @@ if __name__ == "__main__":
         if check_no_rows_dw(conn):
             incremental_load()
         else:
-            full_load()
+            full_load(conn)
         conn.commit()
