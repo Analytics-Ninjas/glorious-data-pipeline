@@ -73,28 +73,31 @@ def records_to_tuple(df):
 
 
 def update_end_date_outdated_records(conn, update_values):
-    query = f"""
-    INSERT INTO user_dim (
-        user_id, name, email, start_date, end_date, is_current
-    ) 
-    VALUES {update_values}
-    ON CONFLICT (user_id, end_date) DO 
-    UPDATE 
-    SET 
-        end_date = EXCLUDED.start_date - interval '1 second',
-        is_current = false 
-    WHERE 
-        user_dim.sk_user_id = (
-            SELECT 
-                MAX(sk_user_id) 
-            FROM 
-                user_dim
-            WHERE 
-                user_id = EXCLUDED.user_id
-    );
-    """
-    conn.execute(text(query))
-    conn.commit()
+    if len(update_values) > 0:
+        query = f"""
+        INSERT INTO user_dim (
+            user_id, name, email, start_date, end_date, is_current
+        ) 
+        VALUES {update_values}
+        ON CONFLICT (user_id, end_date) DO 
+        UPDATE 
+        SET 
+            end_date = EXCLUDED.start_date - interval '1 second',
+            is_current = false 
+        WHERE 
+            user_dim.sk_user_id = (
+                SELECT 
+                    MAX(sk_user_id) 
+                FROM 
+                    user_dim
+                WHERE 
+                    user_id = EXCLUDED.user_id
+        );
+        """
+        conn.execute(text(query))
+        conn.commit()
+    else:
+        pass
 
 
 def insert_new_records(conn, insert_values):
